@@ -1,13 +1,6 @@
 #TODO
-# - iam role for K8s
-#  - EKS-Cluster role
-#  - trusted entities
-#  - policy
 # - VPC 
-#  - subnets 
 #  - security groups - ports?
-#  - cluster IP address family?
-#  - cluster enpoint access - private
 # - Add-Ons
 #  - CoreDNS
 #   - settings
