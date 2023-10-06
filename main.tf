@@ -1,6 +1,8 @@
 #TODO
 # - VPC 
-#  - security groups - ports?
+#  - security groups - ports 
+#     - EKS cluster 443
+#     - NODEGROUP - 8443 1025-65535 6443 53 4443 9443 443 10250 /tcp 53/udp 
 # - Add-Ons
 #  - CoreDNS
 #   - settings
@@ -32,19 +34,20 @@ module "eks_vpc" {
 }
 
 resource "aws_eks_cluster" "eks_cluster" {
-  name = "eks_cluster"
+  name     = "eks_cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
     subnet_ids = [
-      module.subnet_public_1a.id
-      module.subnet_public_1b.id
-      module.subnet_private_1a.id
-      module.subnet_private_1b.id
+      module.eks_vpc.subnet_public_1a.id,
+      module.eks_vpc.subnet_public_1b.id,
+      module.eks_vpc.subnet_private_1a.id,
+      module.eks_vpc.subnet_private_1b.id,
     ]
   }
 
   depends_on = [
-    aws_ia
+    aws_iam_role_policy_attachment.eks_cluster_policy,
+    aws_iam_role_policy_attachment.eks_cluster_resource_policy,
   ]
 }
