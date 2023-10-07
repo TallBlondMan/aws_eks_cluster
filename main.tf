@@ -51,3 +51,9 @@ resource "aws_eks_cluster" "eks_cluster" {
     aws_iam_role_policy_attachment.eks_cluster_resource_policy,
   ]
 }
+
+# CNI addon for cluster
+resource "aws_eks_addon" "eks_cni" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "vpc-cni"
+}
