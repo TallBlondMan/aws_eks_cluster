@@ -12,6 +12,16 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Adding subnets to route tables public
+resource "aws_route_table_association" "public_subnet_route_1a" {
+  subnet_id      = aws_subnet.public_subnet_1a.id
+  route_table_id = aws_route_table.public.id
+}
+resource "aws_route_table_association" "public_subnet_route_1b" {
+  subnet_id      = aws_subnet.public_subnet_1b.id
+  route_table_id = aws_route_table.public.id
+}
+
 # Private access table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.eks_vpc.id
@@ -24,16 +34,6 @@ resource "aws_route_table" "private" {
   tags = {
     Name = "private"
   }
-}
-
-# Adding subnets to route tables public
-resource "aws_route_table_association" "public_subnet_route_1a" {
-  subnet_id      = aws_subnet.public_subnet_1a.id
-  route_table_id = aws_route_table.public.id
-}
-resource "aws_route_table_association" "public_subnet_route_1b" {
-  subnet_id      = aws_subnet.public_subnet_1b.id
-  route_table_id = aws_route_table.public.id
 }
 
 # Adding subnets to route tables private
