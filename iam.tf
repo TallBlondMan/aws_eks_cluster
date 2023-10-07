@@ -35,7 +35,7 @@ resource "aws_iam_role" "eks_nodegroup_role" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Service" : "eks.amazonaws.com"
+          "Service" : "ec2.amazonaws.com"
         },
         "Action" : "sts:AssumeRole"
       }
@@ -96,7 +96,7 @@ resource "aws_iam_role" "eks_vpc_cni_role" {
 }
 
 # Attaches the CNI policy to the role 
-resource "aws_iam_role_policy_attachment" "example" {
+resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.eks_vpc_cni_role.name
 }
