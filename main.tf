@@ -16,6 +16,8 @@
 #  - And all the rest goodies
 
 #  Ports for network tcp 22, 943, 945, 443 udp 1194 - for VPN server(OpenVPN)
+
+# Custom security group for cluster - port 443
 terraform {
   required_providers {
     aws = {
