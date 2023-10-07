@@ -1,20 +1,10 @@
 #TODO
-# - VPC 
-#  - security groups - ports 
+# Names for nodes instances
+# Look into template for nodes
+# Security group for instances
+# Security group for cluster
 #     - EKS cluster 443
 #     - NODEGROUP - 8443 1025-65535 6443 53 4443 9443 443 10250 /tcp 53/udp 
-# - Add-Ons
-#  - CoreDNS
-#   - settings
-#  - kube-proxy
-#   - settings
-#  - Amazon NPC CNI
-#   - settings
-#  - ???
-#  - Configure nodes
-#   - group nodes
-#  - And all the rest goodies
-
 #  Ports for network tcp 22, 943, 945, 443 udp 1194 - for VPN server(OpenVPN)
 
 # Custom security group for cluster - port 443

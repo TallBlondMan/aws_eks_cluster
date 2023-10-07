@@ -90,9 +90,10 @@ data "aws_iam_policy_document" "eks_oidc_policy" {
 }
 
 # Creates an IAM Role that can be assigned to service 
+# Roles names have to be a all character strings -----
 resource "aws_iam_role" "eks_vpc_cni_role" {
   assume_role_policy = data.aws_iam_policy_document.eks_oidc_policy.json
-  name               = "eks-VPCCNIRole"
+  name               = "eksVPCCNIRole"
 }
 
 # Attaches the CNI policy to the role 

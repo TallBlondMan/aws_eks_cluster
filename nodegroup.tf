@@ -11,11 +11,11 @@ resource "aws_eks_node_group" "eks_node_group" {
     module.eks_vpc.subnet_private_1a.id,
     module.eks_vpc.subnet_private_1b.id,
   ]
-
+  # desired_size has to be between min and max
   scaling_config {
-    desired_size = 1
+    desired_size = 2
     max_size     = 4
-    min_size     = 1
+    min_size     = 2
   }
 
   update_config {
