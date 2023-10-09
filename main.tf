@@ -1,4 +1,8 @@
 #TODO
+# Add autoscaler 
+#   - https://karpenter.sh/docs/
+#   - https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md 
+# Cluster does not remove due to "deleting EKS Cluster (eks_cluster): ResourceInUseException: Cluster has nodegroups attached"
 # Names for nodes instances -     aws_launch_template
 # Look into template for nodes
 # Cluster deploys - tho not autoscaling? 

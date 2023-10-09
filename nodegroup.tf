@@ -10,6 +10,8 @@
 # 10250 /tcp - Kublet API
 # 53/udp  - CoreDNS UDP
 # ==========================*/
+
+# Add node template to nodes! 
 locals {
   security_rules_nodes = {
     ingress_node_api = {
