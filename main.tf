@@ -1,10 +1,9 @@
 #TODO
-# Names for nodes instances
+# Names for nodes instances -     aws_launch_template
 # Look into template for nodes
 # Security group for instances
 # Security group for cluster
 #     - EKS cluster 443
-#     - NODEGROUP - 8443 1025-65535 6443 53 4443 9443 443 10250 /tcp 53/udp 
 #  Ports for network tcp 22, 943, 945, 443 udp 1194 - for VPN server(OpenVPN)
 
 # Custom security group for cluster - port 443
