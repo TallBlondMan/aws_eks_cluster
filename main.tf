@@ -24,6 +24,18 @@ module "eks_vpc" {
   source = "./modules/eks_vpc"
 }
 
+locals {
+  security_rules_cluster = {
+
+    ingress_node_api = {
+      from_port   = 10250
+      to_port     = 10250
+      protocol    = "tcp"
+      description = "Kubelet API"
+    }
+  }
+}
+
 resource "aws_eks_cluster" "eks_cluster" {
   name     = "eks_cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn

@@ -1,33 +1,67 @@
-#     - NODEGROUP - 8443 1025-65535 6443 53 4443 9443 443 10250 /tcp 53/udp 
+#       - NODEGROUP - 
+/*==========================
+# 8443 - Cluster API to node
+# 1025-65535
+# 6443 - Cluster API to node
+# 53 - CoreDNS
+# 4443 - Cluster API to node
+# 9443 - Cluster API to node
+# 443 - HTTPS
+# 10250 /tcp - Kublet API
+# 53/udp  - CoreDNS UDP
+# ==========================*/
 locals {
-  security_groups = {
+  security_rules_nodes = {
     ingress_node_api = {
-      from_port = 10250
-      to_port = 10250
+      from_port   = 10250
+      to_port     = 10250
+      protocol    = "tcp"
+      description = "Kubelet API"
     }
     ingress_node_service = {
-      from_port = 30000
-      to_port = 32767
+      from_port   = 30000
+      to_port     = 32767
+      protocol    = "tcp"
+      description = "NodePort Services"
+    }
+    ingress_coredns_tcp = {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "tcp"
+      description = "CoreDNS service TCP"
+    }
+    ingress_coredns_udp = {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "udp"
+      description = "CoreDNS servce UDP"
     }
   }
 }
 
-# Security groups for Nodes
+# Security group for Nodes
 resource "aws_security_group" "eks_node_group_sg" {
-  name = "defaultNodeGroup"
+  name        = "defaultNodeGroup"
   description = "Allowed ports for node group"
-  vpc_id = module.eks_vpc.vpc_id
+  vpc_id      = module.eks_vpc.vpc_id
 
   dynamic "ingress" {
-    for_each = local.security_groups
+    for_each = local.security_rules_nodes
 
     content {
-      description = ingress.value.description
-      from_port   = ingress.value.port
-      to_port     = ingress.value.port
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
       protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidr_blocks
+      description = ingress.value.description
     }
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+    description      = "Allow All"
   }
 }
 
@@ -58,8 +92,8 @@ resource "aws_eks_node_group" "eks_node_group" {
   instance_types = ["t2.micro", "t3.small", "t3.medium"]
 
   launch_template {
-    id      = eks_nodes_template.id
-    version = eks_nodes_template.latest_version
+    id      = aws_launch_template.eks_nodes_template.id
+    version = aws_launch_template.eks_nodes_template.latest_version
   }
 
   subnet_ids = [

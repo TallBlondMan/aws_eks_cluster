@@ -25,5 +25,5 @@ output "subnet_private_1b" {
 output "vpc_id" {
   value = aws_vpc.eks_vpc.id
   description = "VPC ID for use"
-  depends_on = [aws_vpc.eks_vpc.id]
+  depends_on = [aws_vpc.eks_vpc]
 }
