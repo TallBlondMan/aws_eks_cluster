@@ -5,7 +5,6 @@
 # Cluster does not remove due to "deleting EKS Cluster (eks_cluster): ResourceInUseException: Cluster has nodegroups attached"
 # Names for nodes instances -     aws_launch_template
 # Look into template for nodes
-# Cluster deploys - tho not autoscaling? 
 #  Ports for VPN server(OpenVPN) tcp 22, 943, 945, 443 |  udp 1194 
 
 # Custom security group for cluster - port 443
@@ -69,8 +68,8 @@ locals {
 
 # Cluster security group
 resource "aws_security_group" "eks_cluster_sg" {
-  name        = "defaultNodeGroup"
-  description = "Allowed ports for node group"
+  name        = "ClusterSecurityGroup"
+  description = "Allowed ports for cluster"
   vpc_id      = module.eks_vpc.vpc_id
 
   dynamic "ingress" {
@@ -107,7 +106,7 @@ resource "aws_eks_cluster" "eks_cluster" {
       module.eks_vpc.subnet_private_1b.id,
     ]
 
-    security_group_ids = [ 
+    security_group_ids = [
       aws_security_group.eks_cluster_sg.id,
     ]
   }

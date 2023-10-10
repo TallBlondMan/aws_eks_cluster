@@ -11,7 +11,13 @@
 # 53/udp  - CoreDNS UDP
 # ==========================*/
 
-# Add node template to nodes! 
+# Security groups are not working - try the new method
+/*################################### 
+# - aws_vpc_security_group_egress_rule  
+# - aws_vpc_security_group_ingress_rule 
+# resources have been added to address these limitations
+# and should be used for all new security group rules. 
+#####################################*/
 locals {
   security_rules_nodes = {
     ingress_node_api = {
@@ -91,7 +97,7 @@ resource "aws_eks_node_group" "eks_node_group" {
   node_role_arn   = aws_iam_role.eks_nodegroup_role.arn
 
   ami_type       = "AL2_x86_64"
-  instance_types = ["t2.micro", "t3.small", "t3.medium"]
+  instance_types = ["t3.medium"]
 
   launch_template {
     id      = aws_launch_template.eks_nodes_template.id
@@ -105,12 +111,17 @@ resource "aws_eks_node_group" "eks_node_group" {
   # desired_size has to be between min and max
   scaling_config {
     desired_size = 2
-    max_size     = 4
+    max_size     = 10
     min_size     = 2
   }
 
   update_config {
     max_unavailable = 1
+  }
+
+  tags = {
+    tag = "k8s.io/cluster-autoscaler/enabled"
+    tag = "k8s.io/cluster-autoscaler/eks_cluster"
   }
 
   depends_on = [
