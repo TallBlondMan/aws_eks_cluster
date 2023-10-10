@@ -12,6 +12,7 @@
 # ==========================*/
 
 # Security groups are not working - try the new method
+# Autoscaler might have access issues - need to investigate
 /*################################### 
 # - aws_vpc_security_group_egress_rule  
 # - aws_vpc_security_group_ingress_rule 
