@@ -27,3 +27,7 @@ output "vpc_id" {
   description = "VPC ID for use"
   depends_on = [aws_vpc.eks_vpc]
 }
+
+/* output "subnet_list" {
+  value = concat(output.subnet_public_1a)
+} */

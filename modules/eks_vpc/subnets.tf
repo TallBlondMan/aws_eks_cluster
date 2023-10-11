@@ -55,12 +55,15 @@ variable "subnet_map" {
       cidr_block = "10.0.3.0/24"
     }
     private_subnet_1a = {
-      
+
     }
   }
 }
 
-resource "aws_subnet" "subnet" {
+
+
+
+/* resource "aws_subnet" "subnet" {
   # resource.aws_subnet.subnet["private_subnet_1b"]
   for_each = { for k, v  in var.subnet_map : k => v }
   vpc_id                  = aws_vpc.eks_vpc.id
@@ -73,4 +76,4 @@ resource "aws_subnet" "subnet" {
     "kubernetes.io/cluster/eks_cluster" = "owned"
     "kubernetes.io/role/elb"            = 1
   }
-}
+} */
