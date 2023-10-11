@@ -46,3 +46,31 @@ resource "aws_subnet" "private_subnet_1b" {
     "kubernetes.io/role/internal-elb"   = 1
   }
 }
+
+
+variable "subnet_map" {
+  type = any
+  default = {
+    private_subnet_1b = {
+      cidr_block = "10.0.3.0/24"
+    }
+    private_subnet_1a = {
+      
+    }
+  }
+}
+
+resource "aws_subnet" "subnet" {
+  # resource.aws_subnet.subnet["private_subnet_1b"]
+  for_each = { for k, v  in var.subnet_map : k => v }
+  vpc_id                  = aws_vpc.eks_vpc.id
+  cidr_block              = each.value.cidr_block
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name                                = "public-us-east-1b"
+    "kubernetes.io/cluster/eks_cluster" = "owned"
+    "kubernetes.io/role/elb"            = 1
+  }
+}
