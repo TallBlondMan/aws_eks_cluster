@@ -32,36 +32,42 @@ locals {
       to_port     = 10250
       protocol    = "tcp"
       description = "Kubelet API"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_cluster_api_server = {
       from_port   = 6443
       to_port     = 6443
       protocol    = "tcp"
       description = "Kubernetes API server"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_cluster_https = {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
       description = "Kubelet API"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_cluster_etcd = {
       from_port   = 2379
       to_port     = 2380
       protocol    = "tcp"
       description = "etcd server client API"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_cluster_schedule = {
       from_port   = 10259
       to_port     = 10259
       protocol    = "tcp"
       description = "kube-scheduler"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_cluster_manager = {
       from_port   = 10257
       to_port     = 10257
       protocol    = "tcp"
       description = "kube-controller-manager"
+      cidr_blocks = ["0.0.0.0/0"]
     }
   }
 }
@@ -80,6 +86,7 @@ resource "aws_security_group" "eks_cluster_sg" {
       to_port     = ingress.value.to_port
       protocol    = ingress.value.protocol
       description = ingress.value.description
+      cidr_blocks = ingress.value.cidr_blocks
     }
   }
 

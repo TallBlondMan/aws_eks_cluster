@@ -136,10 +136,20 @@ resource "aws_iam_policy" "node_access_autoscaling" {
           "autoscaling:DescribeAutoScalingInstances",
           "autoscaling:DescribeLaunchConfigurations",
           "autoscaling:DescribeScalingActivities",
-          "autoscaling:SetDesiredCapacity",
-          "autoscaling:TerminateInstanceInAutoScalingGroup"
+          "autoscaling:DescribeTags",
           "ec2:DescribeInstanceTypes",
           "ec2:DescribeLaunchTemplateVersions"
+        ],
+        "Resource" : ["*"]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+          "ec2:DescribeImages",
+          "ec2:GetInstanceTypesFromInstanceRequirements",
+          "eks:DescribeNodegroup"
         ],
         "Resource" : ["*"]
       }

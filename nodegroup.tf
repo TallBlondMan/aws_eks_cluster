@@ -26,24 +26,28 @@ locals {
       to_port     = 10250
       protocol    = "tcp"
       description = "Kubelet API"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_node_service = {
       from_port   = 30000
       to_port     = 32767
       protocol    = "tcp"
       description = "NodePort Services"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_coredns_tcp = {
       from_port   = 53
       to_port     = 53
       protocol    = "tcp"
       description = "CoreDNS service TCP"
+      cidr_blocks = ["0.0.0.0/0"]
     }
     ingress_coredns_udp = {
       from_port   = 53
       to_port     = 53
       protocol    = "udp"
       description = "CoreDNS servce UDP"
+      cidr_blocks = ["0.0.0.0/0"]
     }
   }
 }
@@ -62,6 +66,7 @@ resource "aws_security_group" "eks_node_group_sg" {
       to_port     = ingress.value.to_port
       protocol    = ingress.value.protocol
       description = ingress.value.description
+      cidr_blocks = ingress.value.cidr_blocks
     }
   }
   egress {
