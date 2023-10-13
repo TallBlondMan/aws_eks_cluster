@@ -1,4 +1,4 @@
-# 4 required subnets for EKS cluster - 2 public, 2 private 
+/* # 4 required subnets for EKS cluster - 2 public, 2 private 
 # As per https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
 resource "aws_subnet" "public_subnet_1a" {
   vpc_id                  = aws_vpc.eks_vpc.id
@@ -48,20 +48,6 @@ resource "aws_subnet" "private_subnet_1b" {
 }
 
 
-variable "subnet_map" {
-  type = any
-  default = {
-    private_subnet_1b = {
-      cidr_block = "10.0.3.0/24"
-    }
-    private_subnet_1a = {
-
-    }
-  }
-}
-
-
-
 
 /* resource "aws_subnet" "subnet" {
   # resource.aws_subnet.subnet["private_subnet_1b"]
@@ -76,4 +62,4 @@ variable "subnet_map" {
     "kubernetes.io/cluster/eks_cluster" = "owned"
     "kubernetes.io/role/elb"            = 1
   }
-} */
+} */ 

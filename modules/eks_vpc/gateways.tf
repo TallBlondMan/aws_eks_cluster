@@ -1,4 +1,4 @@
-# Gateway for the VPC
+/* # Gateway for the VPC
 resource "aws_internet_gateway" "eks_igw" {
   vpc_id = aws_vpc.eks_vpc.id
 
@@ -28,4 +28,4 @@ resource "aws_nat_gateway" "eks_nat" {
   depends_on = [
     aws_internet_gateway.eks_igw
   ]
-}
+} */

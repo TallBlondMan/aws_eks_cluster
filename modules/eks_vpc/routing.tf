@@ -1,4 +1,4 @@
-# Public access table
+/* # Public access table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.eks_vpc.id
 
@@ -44,4 +44,4 @@ resource "aws_route_table_association" "private_subnet_route_1a" {
 resource "aws_route_table_association" "private_subnet_route_1b" {
   subnet_id      = aws_subnet.private_subnet_1b.id
   route_table_id = aws_route_table.private.id
-}
+} */

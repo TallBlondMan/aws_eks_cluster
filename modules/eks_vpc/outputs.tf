@@ -1,4 +1,4 @@
-output "subnet_public_1a" {
+/* output "subnet_public_1a" {
   value       = aws_subnet.public_subnet_1a
   description = "description"
   depends_on  = [aws_subnet.public_subnet_1a]
@@ -30,4 +30,4 @@ output "vpc_id" {
 
 /* output "subnet_list" {
   value = concat(output.subnet_public_1a)
-} */
+} */ 
