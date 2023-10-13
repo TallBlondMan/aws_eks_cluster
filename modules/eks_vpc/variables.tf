@@ -38,6 +38,24 @@ variable "private_subnets" {
   }
 }
 
+variable "private_subnet_tags" {
+    description = "General tags for private subnet"
+    type = map
+    default = {
+        "kubernetes.io/cluster/eks_cluster" = "owned",
+        "kubernetes.io/role/internal-elb"   = 1,
+    }
+}
+
+variable "public_subnet_tags" {
+    description = "General tags for public subnet"
+    type = map
+    default = {
+        "kubernetes.io/cluster/eks_cluster" = "owned",
+        "kubernetes.io/role/elb"            = 1,
+    }
+}
+
 variable "nat_gw_name" {
   description = "Name for NAT Gateway"
   type        = string
