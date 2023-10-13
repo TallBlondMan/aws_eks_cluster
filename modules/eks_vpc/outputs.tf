@@ -1,25 +1,22 @@
-/* output "subnet_public_1a" {
-  value       = aws_subnet.public_subnet_1a
-  description = "description"
-  depends_on  = [aws_subnet.public_subnet_1a]
+output "private_subnets" {
+  description = "All the private subnets created"
+  value = aws_subnet.private
+  depends_on = [aws_subnet.private]
 }
 
-output "subnet_public_1b" {
-  value       = aws_subnet.public_subnet_1b
-  description = "description"
-  depends_on  = [aws_subnet.public_subnet_1b]
+output "public_subnets" {
+  description = "All the public subnets created"
+  value = aws_subnet.public
+  depends_on = [aws_subnet.public]
 }
 
-output "subnet_private_1a" {
-  value       = aws_subnet.private_subnet_1a
-  description = "description"
-  depends_on  = [aws_subnet.private_subnet_1a]
-}
-
-output "subnet_private_1b" {
-  value       = aws_subnet.private_subnet_1b
-  description = "description"
-  depends_on  = [aws_subnet.private_subnet_1b]
+output "all_subnets" {
+  description = "All subnets within VPC"
+  value = concat(aws_subnet.private, aws_subnet.public)
+  depends_on = [
+    aws_subnet.private,
+     aws_subnet.public
+  ]
 }
 
 output "vpc_id" {
@@ -27,7 +24,3 @@ output "vpc_id" {
   description = "VPC ID for use"
   depends_on = [aws_vpc.eks_vpc]
 }
-
-/* output "subnet_list" {
-  value = concat(output.subnet_public_1a)
-} */ 

@@ -1,7 +1,3 @@
-locals {
-  
-}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -16,7 +12,7 @@ resource "aws_vpc" "eks_vpc" {
 }
 
 ####################################
-#         SUBNETS
+#         Subnets
 ####################################
 
 resource "aws_subnet" "private" {
@@ -49,7 +45,7 @@ resource "aws_subnet" "public" {
 }
 
 ####################################
-#             ROUTES
+#            Interfaces
 ####################################
 
 resource "aws_internet_gateway" "eks_igw" {
@@ -80,6 +76,10 @@ resource "aws_nat_gateway" "eks_nat" {
     aws_internet_gateway.eks_igw
   ]
 }
+
+####################################
+#            Routes
+####################################
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.eks_vpc.id
