@@ -1,10 +1,14 @@
+locals {
+  vpc_cidr = format("%s/%d", var.vpc_ip, var.vpc_mask)
+}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
 # VPC used by eks
 resource "aws_vpc" "eks_vpc" {
-  cidr_block = var.vpc_cidr
+  cidr_block = local.vpc_cidr
 
   tags = {
     Name = var.vpc_name
@@ -16,11 +20,11 @@ resource "aws_vpc" "eks_vpc" {
 ####################################
 
 resource "aws_subnet" "private" {
-  count = var.private_subnets
+  count = var.private_subnets.number
 
-  cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index)
+  cidr_block        = cidrsubnet(local.vpc_cidr, var.private_subnets.mask - var.vpc_mask, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
-  vpc_id = aws_vpc.eks_vpc.id
+  vpc_id            = aws_vpc.eks_vpc.id
 
   tags = {
     Name                                = "private-${data.aws_availability_zones.available.names[count.index]}"
@@ -30,12 +34,12 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_subnet" "public" {
-  count = var.public_subnets
+  count = var.public_subnets.number
 
-  cidr_block = cidrsubnet(var.vpc_cidr, 8, var.public_subnets+count.index)
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = cidrsubnet(local.vpc_cidr, var.public_subnets.mask - var.vpc_mask, var.public_subnets.number + count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
-  vpc_id = aws_vpc.eks_vpc.id
+  vpc_id                  = aws_vpc.eks_vpc.id
 
   tags = {
     Name                                = "public-${data.aws_availability_zones.available.names[count.index]}"

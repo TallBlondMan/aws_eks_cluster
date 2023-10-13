@@ -1,5 +1,4 @@
 # Module for creating VPC for the needs of EKS cluster
 
-This will create 2 private + 2 public subnets with /24 masks
-
-Plan is for it to be 'variablized' and do more in future 
+This module will create a VPC with specified number of private and public bubnets  
+It will then devide the vpc into desired sized subnets
