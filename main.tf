@@ -1,30 +1,22 @@
 #TODO
-# Add autoscaler 
-#   - https://karpenter.sh/docs/
-#   - https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md 
+# Variablize:
+# - add addons names as variable
+# - work on launch template, more options like CPU
+# - node group:
+#   - ami
+#   - type
+#   - disk size
+#   - scalin, update
+#   - tags
+# - IAM - role attachment and policy creaton ??
+# - private public node groups ??
+#
+# ---Move into one main.tf---
+# ---Make it as module??---
 # Cluster does not remove due to "deleting EKS Cluster (eks_cluster): ResourceInUseException: Cluster has nodegroups attached"
-# Names for nodes instances -     aws_launch_template
-# Look into template for nodes
 #  Ports for VPN server(OpenVPN) tcp 22, 943, 945, 443 |  udp 1194 
 
 # Custom security group for cluster - port 443
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.19.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-east-1"
-}
-
-module "eks_vpc" {
-  source = "./modules/eks_vpc"
-}
-
 locals {
   security_rules_cluster = {
     ingress_cluster_api_node = {
@@ -72,6 +64,23 @@ locals {
   }
 }
 
+module "eks_vpc" {
+  source = "./modules/eks_vpc"
+
+  vpc_name = "Kubernetes Cluster VPC"
+  vpc_ip = "10.6.0.0"
+  vpc_mask = 16
+
+  public_subnets = {
+    number = 3,
+    mask   = 24,
+  }
+  private_subnets = {
+    number = 3,
+    mask   = 24,
+  }
+}
+
 # Cluster security group
 resource "aws_security_group" "eks_cluster_sg" {
   name        = "ClusterSecurityGroup"
@@ -79,7 +88,10 @@ resource "aws_security_group" "eks_cluster_sg" {
   vpc_id      = module.eks_vpc.vpc_id
 
   dynamic "ingress" {
-    for_each = local.security_rules_cluster
+    for_each = merge(
+      local.security_rules_cluster,
+      var.eks_cluster_additional_sg_ingress,
+      )
 
     content {
       from_port   = ingress.value.from_port
@@ -106,12 +118,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
-    subnet_ids = [
-      module.eks_vpc.subnet_public_1a.id,
-      module.eks_vpc.subnet_public_1b.id,
-      module.eks_vpc.subnet_private_1a.id,
-      module.eks_vpc.subnet_private_1b.id,
-    ]
+    subnet_ids = module.eks_vpc.all_subnets[*].id
 
     security_group_ids = [
       aws_security_group.eks_cluster_sg.id,

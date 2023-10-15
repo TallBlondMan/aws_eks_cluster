@@ -10,15 +10,6 @@
 # 10250 /tcp - Kublet API
 # 53/udp  - CoreDNS UDP
 # ==========================*/
-
-# Security groups are not working - try the new method
-# Autoscaler might have access issues - need to investigate
-/*################################### 
-# - aws_vpc_security_group_egress_rule  
-# - aws_vpc_security_group_ingress_rule 
-# resources have been added to address these limitations
-# and should be used for all new security group rules. 
-#####################################*/
 locals {
   security_rules_nodes = {
     ingress_node_api = {
@@ -59,7 +50,10 @@ resource "aws_security_group" "eks_node_group_sg" {
   vpc_id      = module.eks_vpc.vpc_id
 
   dynamic "ingress" {
-    for_each = local.security_rules_nodes
+    for_each = merge(
+      local.security_rules_nodes,
+      var.eks_node_group_additional_sg_ingress
+    )
 
     content {
       from_port   = ingress.value.from_port
@@ -110,10 +104,8 @@ resource "aws_eks_node_group" "eks_node_group" {
     version = aws_launch_template.eks_nodes_template.latest_version
   }
 
-  subnet_ids = [
-    module.eks_vpc.subnet_private_1a.id,
-    module.eks_vpc.subnet_private_1b.id,
-  ]
+  subnet_ids = module.eks_vpc.private_subnets[*].id
+
   # desired_size has to be between min and max
   scaling_config {
     desired_size = 2
