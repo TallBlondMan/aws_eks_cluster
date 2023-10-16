@@ -41,7 +41,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.eks_vpc.id
 
   tags = merge(
-    { "Name" = "private-${data.aws_availability_zones.available.names[count.index]}" },
+    { "Name" = "public-${data.aws_availability_zones.available.names[count.index]}" },
     var.public_subnet_tags,
   )
 }

@@ -220,7 +220,7 @@ resource "aws_launch_template" "nodes_templates" { #TODO
   name = "${each.key}-eksNodeTemplate"
 
   block_device_mappings {
-    device_name = "/dev/sda"
+    device_name = "/dev/sdb"
 
     ebs {
       volume_size = 20
@@ -268,48 +268,13 @@ resource "aws_eks_node_group" "managed_node_groups" {
   ]
 }
 
-/* resource "aws_eks_node_group" "eks_node_group" { #TODO
-  cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = var.node_group_name
-  node_role_arn   = aws_iam_role.eks_nodegroup_role.arn
-
-  ami_type       = var.node_group_ami
-  instance_types = var.node_group_instance_types
-
-  launch_template {
-    id      = aws_launch_template.eks_nodes_template.id
-    version = aws_launch_template.eks_nodes_template.latest_version
-  }
-
-  subnet_ids = var.cluster_subnets_ids
-
-  scaling_config {
-    desired_size = var.node_desired_size
-    max_size     = var.node_max_size
-    min_size     = var.node_min_size
-  }
-
-  update_config {
-    max_unavailable = var.node_update_unavailable
-  }
-
-  tags = merge(
-    local.node_group_tags,
-    var.node_group_tags,
-  )
-
-  depends_on = [
-    aws_iam_role_policy_attachment.node_policies_attach
-  ]
-} */
-
 ########################################################
 #                       IAM 
 ########################################################
 locals {
   node_group_iam_group_arn = {
-    arn_worker   = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-    arn_registry = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+    arn_worker   = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+    arn_registry = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
     arn_cni      = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   }
   cluster_iam_group_arn = {

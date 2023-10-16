@@ -46,10 +46,11 @@ module "eks_vpc" {
   vpc_name = "Kubernetes Cluster VPC"
   vpc_ip   = "10.6.0.0"
   vpc_mask = 16
-
+  # Overwrite [ 10.5.2.1/14, 10.6.0.1 ]
   public_subnets = {
     number = 3,
     mask   = 24,
+    manual_cidr = []
   }
   private_subnets = {
     number = 3,
@@ -64,22 +65,6 @@ module "eks_cluster" {
   cluster_subnets_ids         = module.eks_vpc.all_subnets[*].id
   cluster_additional_sg_rules = local.security_rules_cluster
   vpc_id                      = module.eks_vpc.vpc_id
-
-  /* node_group_name           = "eksNodeGroup"
-  node_group_ami            = "AL2_x86_64"
-  node_group_instance_types = ["t2.small", "t3.medium"]
-
-  node_desired_size       = 2
-  node_max_size           = 10
-  node_min_size           = 2
-  node_update_unavailable = 1
-
-  node_subnets_ids               = module.eks_vpc.private_subnets[*].id
-  node_group_additional_sg_rules = local.security_rules_node_group
-
-  node_group_tags = {
-    "tag" = "example"
-  } */
 
   eks_node_groups = {
     node_one = {
