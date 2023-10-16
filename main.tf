@@ -19,56 +19,35 @@
 # Custom security group for cluster - port 443
 locals {
   security_rules_cluster = {
-    ingress_cluster_api_node = {
-      from_port   = 10250
-      to_port     = 10250
+    ingress_node_api = {
+      from_port   = 8080
+      to_port     = 8080
       protocol    = "tcp"
-      description = "Kubelet API"
+      description = "some port"
       cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_cluster_api_server = {
-      from_port   = 6443
-      to_port     = 6443
-      protocol    = "tcp"
-      description = "Kubernetes API server"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_cluster_https = {
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      description = "Kubelet API"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_cluster_etcd = {
-      from_port   = 2379
-      to_port     = 2380
-      protocol    = "tcp"
-      description = "etcd server client API"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_cluster_schedule = {
-      from_port   = 10259
-      to_port     = 10259
-      protocol    = "tcp"
-      description = "kube-scheduler"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_cluster_manager = {
-      from_port   = 10257
-      to_port     = 10257
-      protocol    = "tcp"
-      description = "kube-controller-manager"
-      cidr_blocks = ["0.0.0.0/0"]
+      type        = "ingress"
     }
   }
+  security_rules_node_group = {
+    ingress_allow_ssh = {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      description = "Allow SSH"
+      cidr_blocks = ["0.0.0.0/0"]
+      type        = "ingress"    
+    }
+  }
+}
+output "the_port" {
+  value = { for k, v in local.security_rules_cluster : k => v if v.from_port == 10257 }
 }
 
 module "eks_vpc" {
   source = "./modules/eks_vpc"
 
   vpc_name = "Kubernetes Cluster VPC"
-  vpc_ip = "10.6.0.0"
+  vpc_ip   = "10.6.0.0"
   vpc_mask = 16
 
   public_subnets = {
@@ -81,62 +60,31 @@ module "eks_vpc" {
   }
 }
 
-# Cluster security group
-resource "aws_security_group" "eks_cluster_sg" {
-  name        = "ClusterSecurityGroup"
-  description = "Allowed ports for cluster"
-  vpc_id      = module.eks_vpc.vpc_id
+module "eks_cluster" {
+  source = "./modules/eks_cluster"
 
-  dynamic "ingress" {
-    for_each = merge(
-      local.security_rules_cluster,
-      var.eks_cluster_additional_sg_ingress,
+  cluster_name                = "EKS-one"
+  cluster_subnets_id          = module.eks_vpc.all_subnets[*].id
+  cluster_additional_sg_rules = local.security_rules_cluster
+  vpc_id                      = module.eks_vpc.vpc_id
+
+  node_groups = {
+    nodeg_1 = {
+      node_group_name           = "eksNodeGroup"
+      node_group_ami            = "AL2_x86_64"
+      node_group_instance_types = ["t2.small", "t3.medium"]
+
+      node_scaling = {
+        desired_size = 2
+        max_size     = 10
+        min_size     = 2
+      }
+
+      node_group_additional_sg_rules = local.security_rules_node_group
+
+      tags = merge(
+
       )
-
-    content {
-      from_port   = ingress.value.from_port
-      to_port     = ingress.value.to_port
-      protocol    = ingress.value.protocol
-      description = ingress.value.description
-      cidr_blocks = ingress.value.cidr_blocks
     }
   }
-
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow All"
-  }
-}
-
-# THE CLUSTER
-resource "aws_eks_cluster" "eks_cluster" {
-  name     = "eks_cluster"
-  role_arn = aws_iam_role.eks_cluster_role.arn
-
-  vpc_config {
-    subnet_ids = module.eks_vpc.all_subnets[*].id
-
-    security_group_ids = [
-      aws_security_group.eks_cluster_sg.id,
-    ]
-  }
-
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy,
-    aws_iam_role_policy_attachment.eks_cluster_resource_policy,
-  ]
-}
-
-# CNI addon for cluster
-resource "aws_eks_addon" "eks_cni" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "vpc-cni"
-
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_cni_policy
-  ]
 }
