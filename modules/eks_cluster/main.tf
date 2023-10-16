@@ -6,7 +6,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
-    subnet_ids = var.cluster_subnets_id
+    subnet_ids = var.cluster_subnets_ids
 
     security_group_ids = [
       aws_security_group.eks_cluster_sg.id,
@@ -14,8 +14,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy,
-    aws_iam_role_policy_attachment.eks_cluster_resource_policy,
+    aws_iam_role_policy_attachment.cluster_policis_attach
   ]
 }
 
@@ -142,8 +141,8 @@ resource "aws_security_group" "eks_cluster_sg" {
 
   dynamic "ingress" {
     for_each = merge(
-      { for k, v in local.security_rules_cluster : k => v if v.type == "ingress"},
-      { for k, v in var.cluster_additional_sg_rules : k => v if v.type == "ingress"},
+      { for k, v in local.security_rules_cluster : k => v if v.type == "ingress" },
+      { for k, v in var.cluster_additional_sg_rules : k => v if v.type == "ingress" },
     )
 
     content {
@@ -157,8 +156,8 @@ resource "aws_security_group" "eks_cluster_sg" {
 
   dynamic "egress" { #TODO
     for_each = merge(
-      { for k, v in local.security_rules_cluster : k => v if v.type == "egress"},
-      { for k, v in var.cluster_additional_sg_rules : k => v if v.type == "egress"},
+      { for k, v in local.security_rules_cluster : k => v if v.type == "egress" },
+      { for k, v in var.cluster_additional_sg_rules : k => v if v.type == "egress" },
     )
     content {
       from_port   = egress.value.from_port
@@ -177,8 +176,8 @@ resource "aws_security_group" "eks_node_group_sg" {
 
   dynamic "ingress" {
     for_each = merge(
-      { for k, v in local.security_rules_nodes : k => v if v.type == "ingress"},
-      { for k, v in var.node_group_additional_sg_rules : k => v if v.type == "ingress"},
+      { for k, v in local.security_rules_nodes : k => v if v.type == "ingress" },
+      { for k, v in var.node_group_additional_sg_rules : k => v if v.type == "ingress" },
     )
 
     content { #TODO
@@ -191,8 +190,8 @@ resource "aws_security_group" "eks_node_group_sg" {
   }
   dynamic "egress" {
     for_each = merge(
-      { for k, v in local.security_rules_nodes : k => v if v.type == "egress"},
-      { for k, v in var.node_group_additional_sg_rules : k => v if v.type == "egress"},
+      { for k, v in local.security_rules_nodes : k => v if v.type == "egress" },
+      { for k, v in var.node_group_additional_sg_rules : k => v if v.type == "egress" },
     )
 
     content {
@@ -208,11 +207,20 @@ resource "aws_security_group" "eks_node_group_sg" {
 ########################################################
 #                   Node Groups
 ########################################################
-resource "aws_launch_template" "eks_nodes_template" { #TODO
-  name = "eksNodeTemplate"
+locals {
+  node_group_tags = {
+    tag = "k8s.io/cluster-autoscaler/enabled"
+    tag = "k8s.io/cluster-autoscaler/eks_cluster"
+  }
+}
+
+resource "aws_launch_template" "nodes_templates" { #TODO
+  for_each = var.eks_node_groups
+
+  name = "${each.key}-eksNodeTemplate"
 
   block_device_mappings {
-    device_name = "/dev/sdb"
+    device_name = "/dev/sda"
 
     ebs {
       volume_size = 20
@@ -224,47 +232,91 @@ resource "aws_launch_template" "eks_nodes_template" { #TODO
   ]
 }
 
-resource "aws_eks_node_group" "eks_node_group" { #TODO
+resource "aws_eks_node_group" "managed_node_groups" {
+  for_each = var.eks_node_groups
+
+  cluster_name    = aws_eks_cluster.eks_cluster.name
+  node_group_name = each.value.node_group_name
+  node_role_arn   = aws_iam_role.eks_nodegroup_role.arn
+
+  ami_type       = each.value.node_group_ami
+  instance_types = each.value.node_group_instance_types
+
+  launch_template {
+    id      = aws_launch_template.nodes_templates[each.key].id
+    version = aws_launch_template.nodes_templates[each.key].latest_version
+  }
+
+  subnet_ids = each.value.node_subnets_ids
+
+  scaling_config {
+    desired_size = each.value.node_desired_size
+    max_size     = each.value.node_max_size
+    min_size     = each.value.node_min_size
+  }
+
+  update_config {
+    max_unavailable = each.value.node_update_unavailable
+  }
+
+  tags = merge(
+    local.node_group_tags,
+    each.value.node_group_tags,
+  )
+  depends_on = [
+    aws_iam_role_policy_attachment.node_policies_attach
+  ]
+}
+
+/* resource "aws_eks_node_group" "eks_node_group" { #TODO
   cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = var.node_group_name
   node_role_arn   = aws_iam_role.eks_nodegroup_role.arn
 
   ami_type       = var.node_group_ami
-  instance_types = var.node_group_instance_type
+  instance_types = var.node_group_instance_types
 
   launch_template {
     id      = aws_launch_template.eks_nodes_template.id
     version = aws_launch_template.eks_nodes_template.latest_version
   }
 
-  subnet_ids = module.eks_vpc.private_subnets[*].id
+  subnet_ids = var.cluster_subnets_ids
 
-  # desired_size has to be between min and max
   scaling_config {
-    desired_size = 2
-    max_size     = 10
-    min_size     = 2
+    desired_size = var.node_desired_size
+    max_size     = var.node_max_size
+    min_size     = var.node_min_size
   }
 
   update_config {
-    max_unavailable = 1
+    max_unavailable = var.node_update_unavailable
   }
 
-  tags = {
-    tag = "k8s.io/cluster-autoscaler/enabled"
-    tag = "k8s.io/cluster-autoscaler/eks_cluster"
-  }
+  tags = merge(
+    local.node_group_tags,
+    var.node_group_tags,
+  )
 
   depends_on = [
-    aws_iam_role_policy_attachment.node_worker_policy,
-    aws_iam_role_policy_attachment.node_registry_access,
-    aws_iam_role_policy_attachment.node_CNI_policy,
+    aws_iam_role_policy_attachment.node_policies_attach
   ]
-}
+} */
 
 ########################################################
 #                       IAM 
 ########################################################
+locals {
+  node_group_iam_group_arn = {
+    arn_worker   = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+    arn_registry = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+    arn_cni      = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  }
+  cluster_iam_group_arn = {
+    arn_cluster  = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+    arn_resource = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  }
+}
 
 resource "aws_iam_role" "eks_cluster_role" {
   name = "ClusterServiceRole"
@@ -283,15 +335,12 @@ resource "aws_iam_role" "eks_cluster_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
-  role       = aws_iam_role.eks_cluster_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-}
-resource "aws_iam_role_policy_attachment" "eks_cluster_resource_policy" {
-  role       = aws_iam_role.eks_cluster_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-}
+resource "aws_iam_role_policy_attachment" "cluster_policis_attach" {
+  for_each = local.cluster_iam_group_arn
 
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = each.value
+}
 
 resource "aws_iam_role" "eks_nodegroup_role" {
   name = "eksNodeGroupRole"
@@ -310,19 +359,16 @@ resource "aws_iam_role" "eks_nodegroup_role" {
   })
 }
 # Policies for Node group as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
-resource "aws_iam_role_policy_attachment" "node_worker_policy" {
+resource "aws_iam_role_policy_attachment" "node_policies_attach" {
+  for_each = local.node_group_iam_group_arn
+
   role       = aws_iam_role.eks_nodegroup_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-resource "aws_iam_role_policy_attachment" "node_registry_access" {
-  role       = aws_iam_role.eks_nodegroup_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
-resource "aws_iam_role_policy_attachment" "node_CNI_policy" {
-  role       = aws_iam_role.eks_nodegroup_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  policy_arn = each.value
 }
 
+########################################################
+#                       TLS
+########################################################
 
 data "tls_certificate" "eks_tls" {
   url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer

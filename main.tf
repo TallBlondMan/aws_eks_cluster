@@ -35,12 +35,9 @@ locals {
       protocol    = "tcp"
       description = "Allow SSH"
       cidr_blocks = ["0.0.0.0/0"]
-      type        = "ingress"    
+      type        = "ingress"
     }
   }
-}
-output "the_port" {
-  value = { for k, v in local.security_rules_cluster : k => v if v.from_port == 10257 }
 }
 
 module "eks_vpc" {
@@ -64,27 +61,60 @@ module "eks_cluster" {
   source = "./modules/eks_cluster"
 
   cluster_name                = "EKS-one"
-  cluster_subnets_id          = module.eks_vpc.all_subnets[*].id
+  cluster_subnets_ids         = module.eks_vpc.all_subnets[*].id
   cluster_additional_sg_rules = local.security_rules_cluster
   vpc_id                      = module.eks_vpc.vpc_id
 
-  node_groups = {
-    nodeg_1 = {
+  /* node_group_name           = "eksNodeGroup"
+  node_group_ami            = "AL2_x86_64"
+  node_group_instance_types = ["t2.small", "t3.medium"]
+
+  node_desired_size       = 2
+  node_max_size           = 10
+  node_min_size           = 2
+  node_update_unavailable = 1
+
+  node_subnets_ids               = module.eks_vpc.private_subnets[*].id
+  node_group_additional_sg_rules = local.security_rules_node_group
+
+  node_group_tags = {
+    "tag" = "example"
+  } */
+
+  eks_node_groups = {
+    node_one = {
       node_group_name           = "eksNodeGroup"
       node_group_ami            = "AL2_x86_64"
       node_group_instance_types = ["t2.small", "t3.medium"]
 
-      node_scaling = {
-        desired_size = 2
-        max_size     = 10
-        min_size     = 2
-      }
+      node_desired_size       = 2
+      node_max_size           = 10
+      node_min_size           = 2
+      node_update_unavailable = 1
 
+      node_subnets_ids               = module.eks_vpc.private_subnets[*].id
       node_group_additional_sg_rules = local.security_rules_node_group
 
-      tags = merge(
+      node_group_tags = {
+        "tag" = "first one"
+      }
+    }
+    node_two = {
+      node_group_name           = "new-node-group"
+      node_group_ami            = "AL2_x86_64"
+      node_group_instance_types = ["t2.small"]
 
-      )
+      node_desired_size       = 1
+      node_max_size           = 5
+      node_min_size           = 1
+      node_update_unavailable = 1
+
+      node_subnets_ids               = module.eks_vpc.private_subnets[*].id
+      node_group_additional_sg_rules = local.security_rules_node_group
+
+      node_group_tags = {
+        "tag" = "second one"
+      }
     }
   }
 }

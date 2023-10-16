@@ -5,9 +5,9 @@ variable "main_region" {
 }
 
 variable "vpc_id" {
-    description = "ID of the vpc in which the cluster is to be deployed"
-    type = string
-    default = ""
+  description = "ID of the vpc in which the cluster is to be deployed"
+  type        = string
+  default     = ""
 }
 
 variable "cluster_name" {
@@ -26,12 +26,48 @@ variable "node_group_ami" {
   default = ""
 }
 
+variable "node_subnets_ids" {
+  description = "IDs of all the subnets in which node group is to reside"
+  type        = list(any)
+  default     = []
+}
+
 variable "node_group_instance_types" {
   type    = list(any)
   default = []
 }
 
-variable "cluster_subnets_id" {
+variable "node_desired_size" {
+  description = "Number of nodes cluster will start with"
+  type        = number
+  default     = 0
+}
+
+variable "node_max_size" {
+  description = "Maximal number of nodes cluster can deploy"
+  type        = number
+  default     = 1
+}
+
+variable "node_min_size" {
+  description = "Minimal number of running nodes that cluster can't go below"
+  type        = number
+  default     = 0
+}
+
+variable "node_update_unavailable" {
+  description = "Maximal number of nodes that can be down for updates rollout"
+  type        = number
+  default     = 1
+}
+
+variable "node_group_tags" {
+  description = "Tags to add to node group"
+  type        = map(any)
+  default     = {}
+}
+
+variable "cluster_subnets_ids" {
   type    = list(any)
   default = []
 }
@@ -55,6 +91,12 @@ variable "node_group_additional_sg_rules" {
 
 variable "eks_addons" {
   description = "Names for addons to be included in cluster"
+  type        = map(any)
+  default     = {}
+}
+
+variable "eks_node_groups" {
+  description = "Details for EKS managed node groups to create"
   type        = map(any)
   default     = {}
 }
