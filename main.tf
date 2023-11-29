@@ -50,7 +50,7 @@ module "eks_vpc" {
   public_subnets = {
     number = 3,
     mask   = 24,
-    manual_cidr = []
+  #  manual_cidr = []
   }
   private_subnets = {
     number = 3,
@@ -84,7 +84,7 @@ module "eks_cluster" {
         "tag" = "first one"
       }
     }
-    node_two = {
+    /* node_two = {
       node_group_name           = "new-node-group"
       node_group_ami            = "AL2_x86_64"
       node_group_instance_types = ["t2.small"]
@@ -100,6 +100,6 @@ module "eks_cluster" {
       node_group_tags = {
         "tag" = "second one"
       }
-    }
+    } */
   }
 }

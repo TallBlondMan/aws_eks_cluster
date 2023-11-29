@@ -54,7 +54,7 @@ resource "aws_internet_gateway" "eks_igw" {
   vpc_id = aws_vpc.eks_vpc.id
 
   tags = {
-    Name = var.nat_gw_name
+    Name = var.eip_name
   }
 }
 
@@ -62,7 +62,7 @@ resource "aws_eip" "eks_nat_eip" {
   domain = "vpc"
 
   tags = {
-    Name = var.eip_name
+    Name = var.nat_gw_name
   }
 }
 
