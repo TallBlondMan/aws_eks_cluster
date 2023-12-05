@@ -54,7 +54,7 @@ resource "aws_internet_gateway" "eks_igw" {
   vpc_id = aws_vpc.eks_vpc.id
 
   tags = {
-    Name = var.nat_gw_name
+    Name = var.igw_name
   }
 }
 
@@ -71,7 +71,7 @@ resource "aws_nat_gateway" "eks_nat" {
   subnet_id     = aws_subnet.public[0].id
 
   tags = {
-    Name = var.igw_name
+    Name = var.nat_gw_name
   }
 
   depends_on = [
