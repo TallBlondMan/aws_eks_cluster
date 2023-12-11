@@ -11,9 +11,9 @@ provider "helm" {
 }
 
 data "terraform_remote_state" "k8s_cluster" {
-    backend = "local"
+  backend = "local"
 
-    config = {
-        path = "../terraform.tfstate"
+  config = {
+    path = "../terraform.tfstate"
   }
 }
