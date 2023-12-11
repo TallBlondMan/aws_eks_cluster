@@ -1,3 +1,3 @@
 # Terrafrom EKS cluster deployment
 
-A module for the ELS cluster deployment
+A module for the EKS cluster deployment
