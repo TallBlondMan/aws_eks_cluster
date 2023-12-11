@@ -50,7 +50,7 @@ module "eks_vpc" {
   public_subnets = {
     number = 3,
     mask   = 24,
-  #  manual_cidr = []
+    #  manual_cidr = []
   }
   private_subnets = {
     number = 3,

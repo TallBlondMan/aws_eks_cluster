@@ -437,3 +437,40 @@ resource "aws_iam_role_policy_attachment" "node_access_autoscaling" {
   role       = aws_iam_role.eks_cluster_autoscaler.name
   policy_arn = aws_iam_policy.node_access_autoscaling.arn
 }
+
+####################################################################
+#                       Load Balancer
+####################################################################
+
+data "aws_iam_policy_document" "aws_load_balancer_controller_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks_oidc.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_policy.json
+  name               = "aws-load-balancer-controller"
+}
+
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  policy = file("./lb-iam-policy.json")
+  name   = "AWSLoadBalancerController"
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+  role       = aws_iam_role.aws_load_balancer_controller.name
+  policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
+}
