@@ -8,7 +8,7 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   set {
     name  = "clusterName"
-    value = terraform_remote_state.k8s_cluster.id
+    value = data.terraform_remote_state.k8s_cluster.id
   }
 
   set {
