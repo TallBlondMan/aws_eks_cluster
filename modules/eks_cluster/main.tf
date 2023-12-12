@@ -91,6 +91,15 @@ locals {
       cidr_blocks = ["0.0.0.0/0"]
       type        = "ingress"
     }
+    # Fighting with LoadBalancer
+    ingress_cluster_api_server = {
+      from_port   = 9443
+      to_port     = 9443
+      protocol    = "tcp"
+      description = "LoadBalancer Allow"
+      cidr_blocks = ["0.0.0.0/0"]
+      type        = "ingress"
+    }
     ingress_cluster_https = {
       from_port   = 443
       to_port     = 443

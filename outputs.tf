@@ -13,6 +13,11 @@ output "lb_role_arn" {
 }
 
 output "cluster_ca" {
-  value = module.eks_cluster.cluster_ca_cert
+  value       = module.eks_cluster.cluster_ca_cert
   description = "For use in Helm provider"
+}
+
+output "cluster_name" {
+  value       = module.eks_cluster.cluster_name
+  description = "ID of the cluster, for use in Helm provider"
 }
