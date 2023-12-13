@@ -219,7 +219,7 @@ resource "aws_security_group" "eks_node_group_sg" {
 locals {
   node_group_tags = {
     tag = "k8s.io/cluster-autoscaler/enabled"
-    tag = "k8s.io/cluster-autoscaler/eks_cluster"
+    tag = "k8s.io/cluster-autoscaler/${var.cluster_name}"
   }
 }
 

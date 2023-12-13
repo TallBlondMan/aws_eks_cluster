@@ -20,6 +20,12 @@ variable "vpc_mask" {
   default     = 16
 }
 
+variable "eks_cluster_name" {
+  description = "Name of EKS cluster for correct tags on subnets"
+  type = string
+  default = ""
+}
+
 variable "public_subnets" {
   description = "Number of public subnets to create and it's mask"
   type        = map(any)
@@ -36,24 +42,6 @@ variable "private_subnets" {
     number = 2,
     mask   = 24
   }
-}
-
-variable "private_subnet_tags" {
-    description = "General tags for private subnet"
-    type = map
-    default = {
-        "kubernetes.io/cluster/eks_cluster" = "owned",
-        "kubernetes.io/role/internal-elb"   = 1,
-    }
-}
-
-variable "public_subnet_tags" {
-    description = "General tags for public subnet"
-    type = map
-    default = {
-        "kubernetes.io/cluster/eks_cluster" = "owned",
-        "kubernetes.io/role/elb"            = 1,
-    }
 }
 
 variable "nat_gw_name" {

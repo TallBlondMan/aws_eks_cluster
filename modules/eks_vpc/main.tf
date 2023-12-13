@@ -18,6 +18,17 @@ resource "aws_vpc" "eks_vpc" {
 ####################################
 #         Subnets
 ####################################
+locals{
+  private_subnet_tags = {
+      "kubernetes.io/cluster/${var.eks_cluster_name}" = "owned",
+      "kubernetes.io/role/internal-elb"   = 1,
+  }
+  public_subnet_tags = {
+        "kubernetes.io/cluster/${var.eks_cluster_name}" = "owned",
+        "kubernetes.io/role/elb"            = 1,
+  }
+} 
+
 
 resource "aws_subnet" "private" {
   count = var.private_subnets.number
@@ -28,7 +39,7 @@ resource "aws_subnet" "private" {
 
   tags = merge(
     { "Name" = "private-${data.aws_availability_zones.available.names[count.index]}" },
-    var.private_subnet_tags,
+    local.private_subnet_tags,
   )
 }
 
@@ -42,7 +53,7 @@ resource "aws_subnet" "public" {
 
   tags = merge(
     { "Name" = "public-${data.aws_availability_zones.available.names[count.index]}" },
-    var.public_subnet_tags,
+    local.public_subnet_tags,
   )
 }
 

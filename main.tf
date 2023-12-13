@@ -43,6 +43,8 @@ locals {
 module "eks_vpc" {
   source = "./modules/eks_vpc"
 
+  eks_cluster_name = var.cluster_name
+
   vpc_name = "Kubernetes Cluster VPC"
   vpc_ip   = "10.6.0.0"
   vpc_mask = 16
@@ -61,7 +63,7 @@ module "eks_vpc" {
 module "eks_cluster" {
   source = "./modules/eks_cluster"
 
-  cluster_name                = "EKS-one"
+  cluster_name                = var.cluster_name
   cluster_subnets_ids         = module.eks_vpc.all_subnets[*].id
   cluster_additional_sg_rules = local.security_rules_cluster
   vpc_id                      = module.eks_vpc.vpc_id
