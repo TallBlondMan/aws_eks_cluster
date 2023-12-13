@@ -11,7 +11,7 @@ resource "helm_release" "eks_autoscaler" {
     }
 
     set {
-        name = "awsRegion="
+        name = "awsRegion"
         value = data.terraform_remote_state.k8s_cluster.variables.main_region
     }
 }
