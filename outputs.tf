@@ -23,16 +23,16 @@ output "cluster_name" {
 }
 
 output "main_region" {
-  value = var.main_region
-   description = "Region of EKS deployment"
+  value       = var.main_region
+  description = "Region of EKS deployment"
 }
 
 output "autoscaler_serviceaccount_name" {
-  value = module.eks_cluster.autoscaler_serviceaccount_name
+  value       = module.eks_cluster.autoscaler_serviceaccount_name
   description = "Name of service account of Autoscaler"
 }
 
 output "load_balancer_serviceaccount_name" {
-  value = module.eks_cluster.load_balancer_serviceaccount_name
+  value       = module.eks_cluster.load_balancer_serviceaccount_name
   description = "Name of service account of Load Balancer Controler"
 }

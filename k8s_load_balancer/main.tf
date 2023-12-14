@@ -15,7 +15,7 @@ resource "helm_release" "aws_load_balancer_controller" {
     name  = "serviceAccount.name"
     value = data.terraform_remote_state.k8s_cluster.outputs.load_balancer_serviceaccount_name
   }
-  
+
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = data.terraform_remote_state.k8s_cluster.outputs.lb_role_arn

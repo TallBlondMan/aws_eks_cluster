@@ -21,3 +21,13 @@ output "cluster_name" {
   value       = aws_eks_cluster.eks_cluster.id
   description = "ID of the cluster, later used in HELM provider"
 }
+
+output "autoscaler_serviceaccount_name" {
+  value       = var.autoscaler_serviceaccount_name
+  description = "Name of service account of Autoscaler"
+}
+
+output "load_balancer_serviceaccount_name" {
+  value       = var.load_balancer_serviceaccount_name
+  description = "Name of service account of Load Balancer Controler"
+}
