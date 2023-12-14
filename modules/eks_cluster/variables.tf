@@ -100,3 +100,15 @@ variable "eks_node_groups" {
   type        = map(any)
   default     = {}
 }
+
+variable "autoscaler_serviceaccount_name" {
+  description = "Name of service account of Autoscaler"
+  type = string
+  default = "cluster-autoscaler"
+}
+
+variable "load_balancer_serviceaccount_name" {
+  description = "Name of service account of Load Balancer Controler"
+  type = string
+  default = "cluster-autoscaler"
+}
