@@ -33,6 +33,14 @@ resource "aws_eks_addon" "eks_cni" { # TODO
 ########################################################
 locals {
   security_rules_nodes = {
+    ingress_cluster_api_server = {
+      from_port   = 9443
+      to_port     = 9443
+      protocol    = "tcp"
+      description = "LoadBalancer-Controller Allow"
+      cidr_blocks = ["0.0.0.0/0"]
+      type        = "ingress"
+    }
     ingress_node_api = {
       from_port   = 10250
       to_port     = 10250
@@ -88,15 +96,6 @@ locals {
       to_port     = 6443
       protocol    = "tcp"
       description = "Kubernetes API server"
-      cidr_blocks = ["0.0.0.0/0"]
-      type        = "ingress"
-    }
-    # Fighting with LoadBalancer
-    ingress_cluster_api_server = {
-      from_port   = 9443
-      to_port     = 9443
-      protocol    = "tcp"
-      description = "LoadBalancer Allow"
       cidr_blocks = ["0.0.0.0/0"]
       type        = "ingress"
     }
