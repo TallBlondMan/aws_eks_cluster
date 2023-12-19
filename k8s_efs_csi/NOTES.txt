@@ -1,0 +1,21 @@
+For this to work you have to:
+
+- Create EFS and copy it's ID - "fs-xxxxxxx..."
+- The EFS has to be reachable from pods - that means a special SG for EFS that allows trafic on 2049
+- The NodeGroup defauly IAM role needs this new policy attached:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowNodeDoItsThing",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeAvailabilityZones",
+                "elasticfilesystem:ClientWrite",
+                "elasticfilesystem:ClientMount",
+                "elasticfilesystem:DescribeMountTargets"
+            ]
+            "Resource": "*"
+        }
+    ]
+}

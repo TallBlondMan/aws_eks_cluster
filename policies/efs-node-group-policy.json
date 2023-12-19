@@ -1,0 +1,16 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowNodeDoItsThing",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeAvailabilityZones",
+                "elasticfilesystem:ClientWrite",
+                "elasticfilesystem:ClientMount",
+                "elasticfilesystem:DescribeMountTargets"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

@@ -16,7 +16,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: pod-claim-dynamic
 spec:
-  storageClassName: dynamic-cloud-class
+  storageClassName: cloud-storage-efs
   accessModes: 
   - ReadWriteOnce
   resources:
