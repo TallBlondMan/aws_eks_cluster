@@ -12,6 +12,11 @@ output "lb_role_arn" {
   description = "For use in later LB deployment"
 }
 
+output "efs_csi_role_arn" {
+  value       = module.eks_cluster.efs_csi_role_arn
+  description = "For use in later EFS CSI driver deployment"
+}
+
 output "cluster_ca" {
   value       = module.eks_cluster.cluster_ca_cert
   description = "For use in Helm provider"
@@ -35,4 +40,9 @@ output "autoscaler_serviceaccount_name" {
 output "load_balancer_serviceaccount_name" {
   value       = module.eks_cluster.load_balancer_serviceaccount_name
   description = "Name of service account of Load Balancer Controler"
+}
+
+output "efs_csi_serviceaccount_name" {
+  value       = module.eks_cluster.efs_csi_serviceaccount_name
+  description = "Name of the Service Account later used in Helm chart"
 }

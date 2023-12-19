@@ -410,7 +410,7 @@ data "aws_iam_policy_document" "eks_oidc_trust_relationship" {
 }
 
 resource "aws_iam_policy" "node_access_autoscaling" {
-  name = "eksNodeAutoscalerAccess"
+  name   = "eksNodeAutoscalerAccess"
   policy = file("./policies/autoscaling-policy.json")
 }
 
@@ -478,7 +478,7 @@ data "aws_iam_policy_document" "aws_load_efs_csi_trust_relationship" {
     condition {
       test     = "StringEquals"
       variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:${var.efs_csi_serviceaccount_name}"] 
+      values   = ["system:serviceaccount:kube-system:${var.efs_csi_serviceaccount_name}"]
     }
 
     condition {
@@ -496,8 +496,15 @@ data "aws_iam_policy_document" "aws_load_efs_csi_trust_relationship" {
 
 resource "aws_iam_policy" "aws_efs_csi" {
   policy = file("./policies/dynamic-storage-policy.json")
-  name = "EKSEFSDynamicStoragePolicy"
+  name   = "EKSEFSDynamicStoragePolicy"
 }
+# Same policy exists in AWS already and can be got via name:
+#
+# data "aws_iam_policy" "aws_efs_csi" {
+#   name = "AmazonEFSCSIDriverPolicy "
+# }
+# 
+# I chose the "Declare All" approach :)
 
 resource "aws_iam_role" "aws_efs_csi" {
   assume_role_policy = data.aws_iam_policy_document.aws_load_efs_csi_trust_relationship.json
