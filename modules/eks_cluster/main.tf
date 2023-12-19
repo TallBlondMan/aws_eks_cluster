@@ -511,7 +511,7 @@ resource "aws_iam_role" "aws_efs_csi" {
   name               = "EKSEFSDynamicStorageRole"
 }
 
-resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+resource "aws_iam_role_policy_attachment" "aws_efs_csi_attach" {
   role       = aws_iam_role.aws_efs_csi.name
   policy_arn = aws_iam_policy.aws_efs_csi.arn
 }
