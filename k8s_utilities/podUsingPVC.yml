@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod
+spec:
+  volumes:
+  - name: pvc-class
+    persistentVolumeClaim: 
+      claimName: pod-claim
+  containers:
+  - image: nginx
+    name: simple-pod
+    ports:
+    - containerPort: 80
+      name: http-endpoint
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: pvc-class
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod-dynamic
+spec:
+  volumes:
+  - name: pvc-dynamic
+    persistentVolumeClaim: 
+      claimName: pod-claim-dynamic
+  containers:
+  - image: nginx
+    name: simple-pod-dynamic
+    ports:
+    - containerPort: 80
+      name: http-endpoint
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: pvc-dynamic

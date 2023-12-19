@@ -112,3 +112,9 @@ variable "load_balancer_serviceaccount_name" {
   type        = string
   default     = "aws-load-balancer"
 }
+
+variable "efs_csi_serviceaccount_name" {
+  description = "Name of service account for dynamic storage provision"
+  type = string
+  default = "efs-csi-controller"
+}

@@ -50,12 +50,12 @@ module "eks_vpc" {
   vpc_mask = 16
   # Overwrite [ 10.5.2.1/14, 10.6.0.1 ]
   public_subnets = {
-    number = 3,
+    number = 4,
     mask   = 24,
     #  manual_cidr = []
   }
   private_subnets = {
-    number = 3,
+    number = 4,
     mask   = 24,
   }
 }

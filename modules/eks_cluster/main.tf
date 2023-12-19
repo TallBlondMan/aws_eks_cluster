@@ -385,7 +385,7 @@ resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
 #                       AUTOSCALER
 ####################################################################
 
-data "aws_iam_policy_document" "eks_oidc_policy_node" {
+data "aws_iam_policy_document" "eks_oidc_trust_relationship" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
@@ -411,40 +411,11 @@ data "aws_iam_policy_document" "eks_oidc_policy_node" {
 
 resource "aws_iam_policy" "node_access_autoscaling" {
   name = "eksNodeAutoscalerAccess"
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "autoscaling:DescribeAutoScalingGroups",
-          "autoscaling:DescribeAutoScalingInstances",
-          "autoscaling:DescribeLaunchConfigurations",
-          "autoscaling:DescribeScalingActivities",
-          "autoscaling:DescribeTags",
-          "ec2:DescribeInstanceTypes",
-          "ec2:DescribeLaunchTemplateVersions"
-        ],
-        "Resource" : ["*"]
-      },
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "autoscaling:SetDesiredCapacity",
-          "autoscaling:TerminateInstanceInAutoScalingGroup",
-          "ec2:DescribeImages",
-          "ec2:GetInstanceTypesFromInstanceRequirements",
-          "eks:DescribeNodegroup"
-        ],
-        "Resource" : ["*"]
-      }
-    ]
-  })
+  policy = file("./policies/autoscaling-policy.json")
 }
 
 resource "aws_iam_role" "eks_cluster_autoscaler" {
-  assume_role_policy = data.aws_iam_policy_document.eks_oidc_policy_node.json
+  assume_role_policy = data.aws_iam_policy_document.eks_oidc_trust_relationship.json
   name               = "EKSClusterAutoscaler"
 }
 resource "aws_iam_role_policy_attachment" "node_access_autoscaling" {
@@ -456,7 +427,7 @@ resource "aws_iam_role_policy_attachment" "node_access_autoscaling" {
 #                       Load Balancer
 ####################################################################
 
-data "aws_iam_policy_document" "aws_load_balancer_controller_policy" {
+data "aws_iam_policy_document" "aws_load_balancer_controller_trust_relationship" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
@@ -480,17 +451,60 @@ data "aws_iam_policy_document" "aws_load_balancer_controller_policy" {
   }
 }
 
-resource "aws_iam_role" "aws_load_balancer_controller" {
-  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_policy.json
-  name               = "aws-load-balancer-controller"
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  policy = file("./policies/lb-iam-policy.json")
+  name   = "AWSLoadBalancerControllerPolicy"
 }
 
-resource "aws_iam_policy" "aws_load_balancer_controller" {
-  policy = file("./lb-iam-policy.json")
-  name   = "AWSLoadBalancerController"
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_trust_relationship.json
+  name               = "AWSLoadBalancerRole"
 }
 
 resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
   role       = aws_iam_role.aws_load_balancer_controller.name
   policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
+}
+
+####################################################################
+#                   Dynamic Storage Provision
+####################################################################
+
+data "aws_iam_policy_document" "aws_load_efs_csi_trust_relationship" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:${var.efs_csi_serviceaccount_name}"] 
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks_oidc.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_policy" "aws_efs_csi" {
+  policy = file("./policies/dynamic-storage-policy.json")
+  name = "EKSEFSDynamicStoragePolicy"
+}
+
+resource "aws_iam_role" "aws_efs_csi" {
+  assume_role_policy = data.aws_iam_policy_document.aws_load_efs_csi_trust_relationship.json
+  name               = "EKSEFSDynamicStorageRole"
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+  role       = aws_iam_role.aws_efs_csi.name
+  policy_arn = aws_iam_policy.aws_efs_csi.arn
 }
