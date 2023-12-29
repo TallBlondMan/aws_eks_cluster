@@ -467,7 +467,7 @@ resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" 
 }
 
 ####################################################################
-#                   Dynamic Storage Provision
+#                          EFS IAM 
 ####################################################################
 
 data "aws_iam_policy_document" "aws_load_efs_csi_trust_relationship" {
@@ -498,7 +498,7 @@ resource "aws_iam_policy" "aws_efs_csi" {
   policy = file("./policies/dynamic-storage-policy.json")
   name   = "EKSEFSDynamicStoragePolicy"
 }
-# Same policy exists in AWS already and can be got via name:
+# Same policy exists in AWS already and can be retrived via name:
 #
 # data "aws_iam_policy" "aws_efs_csi" {
 #   name = "AmazonEFSCSIDriverPolicy "
@@ -515,3 +515,8 @@ resource "aws_iam_role_policy_attachment" "aws_efs_csi_attach" {
   role       = aws_iam_role.aws_efs_csi.name
   policy_arn = aws_iam_policy.aws_efs_csi.arn
 }
+
+####################################################################
+#                          EBS IAM 
+####################################################################
+#TODO
